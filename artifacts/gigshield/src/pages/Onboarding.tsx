@@ -22,7 +22,7 @@ export default function Onboarding() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
+
     if (!formData.name || !formData.panCard || !formData.deliveryId) {
       setError("Please fill in all required fields.");
       return;
@@ -35,125 +35,147 @@ export default function Onboarding() {
           login(data.deliveryId);
         },
         onError: (err: any) => {
-          setError(err.message || "Failed to create profile. Delivery ID might be in use.");
-        }
+          setError(err.message || "Failed to create profile. Delivery ID might already be in use.");
+        },
       }
     );
   };
 
   return (
     <MobileLayout hideNav>
-      <div className="relative min-h-full flex flex-col px-6 py-12">
-        <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-br from-primary/90 to-accent/90 rounded-b-[3rem] -z-10" />
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center mt-8 mb-10 text-white"
-        >
-          <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-xl border border-white/30">
-            <ShieldCheck size={40} className="text-white" />
-          </div>
-          <h1 className="text-3xl font-display font-bold">GigShield AI</h1>
-          <p className="text-white/80 mt-2 text-center text-sm px-4">
-            Protecting your earnings against weather, traffic, and strikes.
-          </p>
-        </motion.div>
+      <div className="min-h-full flex flex-col">
 
-        <motion.div 
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white rounded-3xl p-6 shadow-xl shadow-black/5 border border-gray-100 flex-1"
-        >
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Create your profile</h2>
-          
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium border border-red-100">
-              {error}
-            </div>
-          )}
+        {/* Bold blue hero header */}
+        <div className="bg-gradient-to-br from-blue-700 via-blue-600 to-cyan-500 px-6 pt-14 pb-12 flex flex-col items-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+            className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mb-5 shadow-xl"
+          >
+            <ShieldCheck size={40} className="text-blue-600" />
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="text-3xl font-display font-bold text-white tracking-tight"
+          >
+            GigShield AI
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="text-blue-100 mt-2 text-center text-sm px-6"
+          >
+            Protecting your earnings against weather, traffic & strikes
+          </motion.p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-gray-700 ml-1">Full Name</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                  <UserCircle size={20} />
-                </div>
-                <input
-                  type="text"
-                  required
-                  className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
-                  placeholder="Rahul Kumar"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                />
+        {/* Form card — overlaps the header slightly */}
+        <div className="flex-1 px-5 -mt-6 pb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white rounded-3xl p-6 shadow-xl shadow-black/10 border border-gray-100"
+          >
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Create your profile</h2>
+
+            {error && (
+              <div className="mb-5 p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium border border-red-100">
+                {error}
               </div>
-            </div>
+            )}
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-gray-700 ml-1">PAN Card Number</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                  <CreditCard size={20} />
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-700 ml-1">Full Name</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                    <UserCircle size={20} />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
+                    placeholder="Rahul Kumar"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
                 </div>
-                <input
-                  type="text"
-                  required
-                  className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all uppercase"
-                  placeholder="ABCDE1234F"
-                  value={formData.panCard}
-                  onChange={(e) => setFormData({ ...formData, panCard: e.target.value.toUpperCase() })}
-                />
               </div>
-              <p className="text-[11px] text-gray-500 ml-1">Required for fraud prevention & claims</p>
-            </div>
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-gray-700 ml-1">Delivery ID (Swiggy/Zomato)</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                  <Truck size={20} />
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-700 ml-1">PAN Card Number</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                    <CreditCard size={20} />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    maxLength={10}
+                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all uppercase outline-none"
+                    placeholder="ABCDE1234F"
+                    value={formData.panCard}
+                    onChange={(e) => setFormData({ ...formData, panCard: e.target.value.toUpperCase() })}
+                  />
                 </div>
-                <input
-                  type="text"
-                  required
-                  className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
-                  placeholder="SW-98765432"
-                  value={formData.deliveryId}
-                  onChange={(e) => setFormData({ ...formData, deliveryId: e.target.value })}
-                />
+                <p className="text-[11px] text-gray-500 ml-1">Required for fraud prevention & claims</p>
               </div>
-            </div>
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-gray-700 ml-1">Working Zone</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                  <MapPin size={20} />
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-700 ml-1">Delivery ID (Swiggy/Zomato)</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                    <Truck size={20} />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
+                    placeholder="SW-98765432"
+                    value={formData.deliveryId}
+                    onChange={(e) => setFormData({ ...formData, deliveryId: e.target.value })}
+                  />
                 </div>
-                <select
-                  className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all appearance-none"
-                  value={formData.zone}
-                  onChange={(e) => setFormData({ ...formData, zone: e.target.value })}
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-700 ml-1">Working Zone</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                    <MapPin size={20} />
+                  </div>
+                  <select
+                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all appearance-none outline-none"
+                    value={formData.zone}
+                    onChange={(e) => setFormData({ ...formData, zone: e.target.value })}
+                  >
+                    <option value="North">North Zone</option>
+                    <option value="South">South Zone</option>
+                    <option value="East">East Zone</option>
+                    <option value="West">West Zone</option>
+                    <option value="Central">Central Zone</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-3">
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full py-4 bg-gradient-to-r from-blue-700 to-blue-500 text-white font-semibold text-base rounded-2xl shadow-lg shadow-blue-200 active:scale-95 transition-all disabled:opacity-60"
                 >
-                  <option value="North">North Zone</option>
-                  <option value="South">South Zone</option>
-                  <option value="East">East Zone</option>
-                  <option value="West">West Zone</option>
-                  <option value="Central">Central Zone</option>
-                </select>
+                  {isPending ? "Setting up..." : "Complete Setup"}
+                </button>
               </div>
-            </div>
+            </form>
+          </motion.div>
+        </div>
 
-            <div className="pt-4">
-              <Button type="submit" size="xl" className="w-full" isLoading={isPending}>
-                Complete Setup
-              </Button>
-            </div>
-          </form>
-        </motion.div>
       </div>
     </MobileLayout>
   );
