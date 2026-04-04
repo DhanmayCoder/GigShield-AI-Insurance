@@ -11,8 +11,10 @@ export default function Onboarding() {
   const { mutate: createUser, isPending } = useCreateUser();
   const [error, setError] = useState("");
   const [panError, setPanError] = useState("");
+  const [deliveryIdError, setDeliveryIdError] = useState("");
 
   const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+  const DELIVERY_ID_REGEX = /^[A-Z]{2}-[0-9]{8}$/;
 
   const validatePan = (value: string) => {
     if (value.length === 0) return setPanError("");
@@ -21,6 +23,24 @@ export default function Onboarding() {
     if (!/^[A-Z]{5}[0-9]{4}/.test(value)) return setPanError("Characters 6–9 must be digits");
     if (!PAN_REGEX.test(value)) return setPanError("Last character must be a letter");
     setPanError("");
+  };
+
+  const formatDeliveryId = (raw: string) => {
+    const letters = raw.replace(/[^A-Z]/gi, "").toUpperCase().slice(0, 2);
+    const digits = raw.replace(/[^0-9]/g, "").slice(0, 8);
+    if (letters.length < 2) return letters;
+    return `${letters}-${digits}`;
+  };
+
+  const validateDeliveryId = (value: string) => {
+    if (value.length === 0) return setDeliveryIdError("");
+    const parts = value.split("-");
+    if (parts.length < 2 || parts[0].length < 2) return setDeliveryIdError("Start with 2 platform letters (e.g. SW, ZM)");
+    if (!/^[A-Z]{2}$/.test(parts[0])) return setDeliveryIdError("First 2 characters must be letters");
+    if (!parts[1] || parts[1].length < 8) return setDeliveryIdError("Must have 8 digits after the dash");
+    if (!/^[0-9]{8}$/.test(parts[1])) return setDeliveryIdError("The 8 characters after the dash must be digits");
+    if (!DELIVERY_ID_REGEX.test(value)) return setDeliveryIdError("Invalid format");
+    setDeliveryIdError("");
   };
 
   const [formData, setFormData] = useState({
@@ -41,6 +61,10 @@ export default function Onboarding() {
     }
     if (!PAN_REGEX.test(formData.panCard)) {
       setPanError("Invalid PAN format — must be 5 letters, 4 digits, 1 letter (e.g. ABCDE1234F)");
+      return;
+    }
+    if (!DELIVERY_ID_REGEX.test(formData.deliveryId)) {
+      setDeliveryIdError("Invalid Delivery ID — must be 2 letters, dash, 8 digits (e.g. SW-98765432)");
       return;
     }
 
@@ -175,12 +199,38 @@ export default function Onboarding() {
                   <input
                     type="text"
                     required
-                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
+                    maxLength={11}
+                    className={`w-full pl-11 pr-16 py-3.5 bg-gray-50 border-2 rounded-xl focus:bg-white focus:ring-4 transition-all outline-none font-mono tracking-widest ${
+                      deliveryIdError
+                        ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                        : DELIVERY_ID_REGEX.test(formData.deliveryId)
+                        ? "border-green-400 focus:border-green-500 focus:ring-green-100"
+                        : "border-transparent focus:border-blue-500 focus:ring-blue-100"
+                    }`}
                     placeholder="SW-98765432"
                     value={formData.deliveryId}
-                    onChange={(e) => setFormData({ ...formData, deliveryId: e.target.value })}
+                    onChange={(e) => {
+                      const formatted = formatDeliveryId(e.target.value);
+                      setFormData({ ...formData, deliveryId: formatted });
+                      validateDeliveryId(formatted);
+                    }}
                   />
+                  {/* Character counter (shows digits entered out of 8) */}
+                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                    <span className={`text-xs font-semibold tabular-nums ${
+                      DELIVERY_ID_REGEX.test(formData.deliveryId) ? "text-green-500" : "text-gray-400"
+                    }`}>
+                      {formData.deliveryId.replace(/[^0-9]/g, "").length}/8
+                    </span>
+                  </div>
                 </div>
+                {deliveryIdError ? (
+                  <p className="text-[11px] text-red-500 ml-1 font-medium">{deliveryIdError}</p>
+                ) : (
+                  <p className="text-[11px] text-gray-500 ml-1">
+                    Format: 2 platform letters · dash · 8 digits &nbsp;·&nbsp; e.g. SW-12345678
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1.5">
