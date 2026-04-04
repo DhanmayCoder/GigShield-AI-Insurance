@@ -10,6 +10,18 @@ export default function Onboarding() {
   const { login } = useAuth();
   const { mutate: createUser, isPending } = useCreateUser();
   const [error, setError] = useState("");
+  const [panError, setPanError] = useState("");
+
+  const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+
+  const validatePan = (value: string) => {
+    if (value.length === 0) return setPanError("");
+    if (value.length < 10) return setPanError("PAN must be 10 characters");
+    if (!/^[A-Z]{5}/.test(value)) return setPanError("First 5 characters must be letters");
+    if (!/^[A-Z]{5}[0-9]{4}/.test(value)) return setPanError("Characters 6–9 must be digits");
+    if (!PAN_REGEX.test(value)) return setPanError("Last character must be a letter");
+    setPanError("");
+  };
 
   const [formData, setFormData] = useState({
     name: "",
@@ -25,6 +37,10 @@ export default function Onboarding() {
 
     if (!formData.name || !formData.panCard || !formData.deliveryId) {
       setError("Please fill in all required fields.");
+      return;
+    }
+    if (!PAN_REGEX.test(formData.panCard)) {
+      setPanError("Invalid PAN format — must be 5 letters, 4 digits, 1 letter (e.g. ABCDE1234F)");
       return;
     }
 
@@ -117,13 +133,37 @@ export default function Onboarding() {
                     type="text"
                     required
                     maxLength={10}
-                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all uppercase outline-none"
+                    className={`w-full pl-11 pr-16 py-3.5 bg-gray-50 border-2 rounded-xl focus:bg-white focus:ring-4 transition-all uppercase outline-none font-mono tracking-widest ${
+                      panError
+                        ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                        : formData.panCard.length === 10 && !panError
+                        ? "border-green-400 focus:border-green-500 focus:ring-green-100"
+                        : "border-transparent focus:border-blue-500 focus:ring-blue-100"
+                    }`}
                     placeholder="ABCDE1234F"
                     value={formData.panCard}
-                    onChange={(e) => setFormData({ ...formData, panCard: e.target.value.toUpperCase() })}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^A-Z0-9]/gi, "").toUpperCase().slice(0, 10);
+                      setFormData({ ...formData, panCard: val });
+                      validatePan(val);
+                    }}
                   />
+                  {/* Character counter */}
+                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                    <span className={`text-xs font-semibold tabular-nums ${
+                      formData.panCard.length === 10 && !panError ? "text-green-500" : "text-gray-400"
+                    }`}>
+                      {formData.panCard.length}/10
+                    </span>
+                  </div>
                 </div>
-                <p className="text-[11px] text-gray-500 ml-1">Required for fraud prevention & claims</p>
+                {panError ? (
+                  <p className="text-[11px] text-red-500 ml-1 font-medium">{panError}</p>
+                ) : (
+                  <p className="text-[11px] text-gray-500 ml-1">
+                    Format: 5 letters · 4 digits · 1 letter &nbsp;·&nbsp; Required for fraud prevention
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1.5">
