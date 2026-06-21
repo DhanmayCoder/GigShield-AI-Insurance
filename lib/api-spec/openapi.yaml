@@ -1,0 +1,520 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: GigShield AI API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: risk
+    description: Risk score operations
+  - name: users
+    description: User profile operations
+  - name: claims
+    description: Claims operations
+  - name: wallet
+    description: Smart wallet operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /risk/environment:
+    get:
+      operationId: getEnvironmentData
+      tags: [risk]
+      summary: Get simulated environment data
+      description: Returns simulated environmental factors used for risk scoring
+      responses:
+        "200":
+          description: Environment data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvironmentData"
+
+  /risk/score:
+    post:
+      operationId: calculateRiskScore
+      tags: [risk]
+      summary: Calculate risk score
+      description: Calculates risk score based on plan and environment data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RiskScoreRequest"
+      responses:
+        "200":
+          description: Risk score result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RiskScoreResult"
+
+  /users:
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "409":
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users/{deliveryId}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user profile
+      parameters:
+        - name: deliveryId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users/{deliveryId}/plan:
+    put:
+      operationId: updateUserPlan
+      tags: [users]
+      summary: Update user insurance plan
+      parameters:
+        - name: deliveryId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePlanRequest"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /claims:
+    post:
+      operationId: submitClaim
+      tags: [claims]
+      summary: Submit an insurance claim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClaimRequest"
+      responses:
+        "200":
+          description: Claim result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClaimResult"
+        "400":
+          description: Claim rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClaimResult"
+
+  /claims/{deliveryId}:
+    get:
+      operationId: getClaims
+      tags: [claims]
+      summary: Get claims history for user
+      parameters:
+        - name: deliveryId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Claims list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClaimsHistory"
+
+  /wallet/{deliveryId}:
+    get:
+      operationId: getWallet
+      tags: [wallet]
+      summary: Get smart wallet data
+      parameters:
+        - name: deliveryId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Wallet data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletData"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message
+
+    EnvironmentData:
+      type: object
+      properties:
+        rain:
+          type: number
+          description: Rain intensity normalized 0-100
+        temp:
+          type: number
+          description: Temperature risk normalized 0-100
+        pollution:
+          type: number
+          description: Air quality index normalized 0-100
+        traffic:
+          type: number
+          description: Traffic congestion normalized 0-100
+        strike:
+          type: number
+          description: Strike probability 0-100
+        timestamp:
+          type: string
+          format: date-time
+        rawData:
+          type: object
+          properties:
+            rainfall_mm:
+              type: number
+            temperature_c:
+              type: number
+            aqi:
+              type: number
+            traffic_level:
+              type: string
+            strike_alert:
+              type: boolean
+      required:
+        - rain
+        - temp
+        - pollution
+        - traffic
+        - strike
+        - timestamp
+
+    RiskScoreRequest:
+      type: object
+      properties:
+        plan:
+          type: string
+          enum: [bronze, silver, gold]
+        deliveryId:
+          type: string
+        environmentData:
+          $ref: "#/components/schemas/EnvironmentData"
+      required:
+        - plan
+
+    RiskScoreResult:
+      type: object
+      properties:
+        score:
+          type: number
+          description: Risk score 0-100
+        plan:
+          type: string
+          enum: [bronze, silver, gold]
+        payoutTier:
+          type: string
+          enum: [none, small, medium, full]
+        payoutDescription:
+          type: string
+        breakdown:
+          type: object
+          properties:
+            rain:
+              type: number
+            temp:
+              type: number
+            pollution:
+              type: number
+            traffic:
+              type: number
+            strike:
+              type: number
+      required:
+        - score
+        - plan
+        - payoutTier
+        - payoutDescription
+
+    CreateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        panCard:
+          type: string
+          description: PAN card number for fraud prevention
+        deliveryId:
+          type: string
+          description: Unique delivery platform ID
+        zone:
+          type: string
+          description: Registered delivery zone
+        plan:
+          type: string
+          enum: [bronze, silver, gold]
+      required:
+        - name
+        - panCard
+        - deliveryId
+        - zone
+        - plan
+
+    UpdatePlanRequest:
+      type: object
+      properties:
+        plan:
+          type: string
+          enum: [bronze, silver, gold]
+      required:
+        - plan
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        panCard:
+          type: string
+        deliveryId:
+          type: string
+        zone:
+          type: string
+        plan:
+          type: string
+          enum: [bronze, silver, gold]
+        registeredAt:
+          type: string
+          format: date-time
+        isEligibleForClaim:
+          type: boolean
+          description: True if account is at least 3 weeks old
+        walletBalance:
+          type: number
+        totalSaved:
+          type: number
+      required:
+        - id
+        - name
+        - panCard
+        - deliveryId
+        - zone
+        - plan
+        - registeredAt
+        - isEligibleForClaim
+        - walletBalance
+        - totalSaved
+
+    ClaimRequest:
+      type: object
+      properties:
+        deliveryId:
+          type: string
+        riskScore:
+          type: number
+        plan:
+          type: string
+          enum: [bronze, silver, gold]
+        currentLatitude:
+          type: number
+          description: GPS latitude for zone verification
+        currentLongitude:
+          type: number
+          description: GPS longitude for zone verification
+      required:
+        - deliveryId
+        - riskScore
+        - plan
+
+    ClaimResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        payoutAmount:
+          type: number
+        payoutTier:
+          type: string
+          enum: [none, small, medium, full]
+        reason:
+          type: string
+        claimId:
+          type: string
+        rejectionReason:
+          type: string
+      required:
+        - success
+        - reason
+
+    ClaimsHistory:
+      type: object
+      properties:
+        deliveryId:
+          type: string
+        claims:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClaimRecord"
+        totalPaid:
+          type: number
+      required:
+        - deliveryId
+        - claims
+        - totalPaid
+
+    ClaimRecord:
+      type: object
+      properties:
+        id:
+          type: number
+        claimId:
+          type: string
+        riskScore:
+          type: number
+        payoutAmount:
+          type: number
+        payoutTier:
+          type: string
+        plan:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - claimId
+        - riskScore
+        - payoutAmount
+        - payoutTier
+        - plan
+        - status
+        - createdAt
+
+    WalletData:
+      type: object
+      properties:
+        deliveryId:
+          type: string
+        balance:
+          type: number
+        totalSaved:
+          type: number
+        interestRate:
+          type: number
+          description: Annual interest rate percentage
+        interestEarned:
+          type: number
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/WalletTransaction"
+      required:
+        - deliveryId
+        - balance
+        - totalSaved
+        - interestRate
+        - interestEarned
+        - transactions
+
+    WalletTransaction:
+      type: object
+      properties:
+        id:
+          type: number
+        type:
+          type: string
+          enum: [premium, payout, interest]
+        amount:
+          type: number
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - amount
+        - description
+        - createdAt

@@ -1,0 +1,21 @@
+packages:
+  "framer-motion": "For smooth gauge animations and page transitions"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility function to efficiently merge Tailwind CSS classes"
+  "date-fns": "For formatting dates in transaction history"
+  "lucide-react": "For icons across the app"
+  "@tanstack/react-query": "Already in base stack but explicitly noting for api-client-react usage"
+  "wouter": "Already in base stack, used for routing"
+
+images:
+  - path: "artifacts/gigshield/public/images/logo.png"
+    description: "A clean, modern, minimalist 2D logo of a futuristic shield with a lightning bolt or tech elements, deep trustworthy blue color, transparent background"
+    aspect_ratio: "1:1"
+  - path: "artifacts/gigshield/public/images/header-bg.png"
+    description: "Abstract soft geometric tech background in deep navy blue and vibrant teal, smooth gradients, subtle glowing mesh"
+    aspect_ratio: "16:9"
+
+notes:
+  - The app uses `localStorage` to simulate a logged-in user session via `deliveryId`
+  - React Query hooks are imported from the workspace `@workspace/api-client-react`
+  - The layout is strictly mobile-first, constrained to `max-w-md` on larger screens to simulate a mobile app experience
