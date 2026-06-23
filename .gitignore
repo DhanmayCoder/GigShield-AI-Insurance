@@ -45,3 +45,8 @@ Thumbs.db
 .cache/
 .local/
 .vite/
+
+# Environment variables
+.env
+.env.*
+!.env.example
