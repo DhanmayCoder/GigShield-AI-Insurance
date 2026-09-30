@@ -2,13 +2,9 @@ import { Router, type IRouter } from "express";
 import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { CreateUserBody, UpdateUserPlanBody } from "@workspace/api-zod";
+import { isEligibleForClaim } from "../lib/eligibility";
 
 const router: IRouter = Router();
-
-function isEligibleForClaim(registeredAt: Date): boolean {
-  const THREE_WEEKS_MS = 21 * 24 * 60 * 60 * 1000;
-  return Date.now() - registeredAt.getTime() >= THREE_WEEKS_MS;
-}
 
 function formatUser(user: typeof usersTable.$inferSelect) {
   return {

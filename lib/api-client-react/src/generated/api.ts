@@ -65,11 +65,11 @@ export const getHealthCheckQueryOptions = <
   TData = Awaited<ReturnType<typeof healthCheck>>,
   TError = ErrorType<unknown>,
 >(options?: {
-  query?: UseQueryOptions<
+  query?: Partial<UseQueryOptions<
     Awaited<ReturnType<typeof healthCheck>>,
     TError,
     TData
-  >;
+  >>;
   request?: SecondParameter<typeof customFetch>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -100,11 +100,11 @@ export function useHealthCheck<
   TData = Awaited<ReturnType<typeof healthCheck>>,
   TError = ErrorType<unknown>,
 >(options?: {
-  query?: UseQueryOptions<
+  query?: Partial<UseQueryOptions<
     Awaited<ReturnType<typeof healthCheck>>,
     TError,
     TData
-  >;
+  >>;
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
@@ -141,11 +141,11 @@ export const getGetEnvironmentDataQueryOptions = <
   TData = Awaited<ReturnType<typeof getEnvironmentData>>,
   TError = ErrorType<unknown>,
 >(options?: {
-  query?: UseQueryOptions<
+  query?: Partial<UseQueryOptions<
     Awaited<ReturnType<typeof getEnvironmentData>>,
     TError,
     TData
-  >;
+  >>;
   request?: SecondParameter<typeof customFetch>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -176,11 +176,11 @@ export function useGetEnvironmentData<
   TData = Awaited<ReturnType<typeof getEnvironmentData>>,
   TError = ErrorType<unknown>,
 >(options?: {
-  query?: UseQueryOptions<
+  query?: Partial<UseQueryOptions<
     Awaited<ReturnType<typeof getEnvironmentData>>,
     TError,
     TData
-  >;
+  >>;
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetEnvironmentDataQueryOptions(options);
@@ -392,7 +392,7 @@ export const getGetUserQueryOptions = <
 >(
   deliveryId: string,
   options?: {
-    query?: UseQueryOptions<Awaited<ReturnType<typeof getUser>>, TError, TData>;
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUser>>, TError, TData>>;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
@@ -429,7 +429,7 @@ export function useGetUser<
 >(
   deliveryId: string,
   options?: {
-    query?: UseQueryOptions<Awaited<ReturnType<typeof getUser>>, TError, TData>;
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUser>>, TError, TData>>;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -642,11 +642,11 @@ export const getGetClaimsQueryOptions = <
 >(
   deliveryId: string,
   options?: {
-    query?: UseQueryOptions<
+    query?: Partial<UseQueryOptions<
       Awaited<ReturnType<typeof getClaims>>,
       TError,
       TData
-    >;
+    >>;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
@@ -683,11 +683,11 @@ export function useGetClaims<
 >(
   deliveryId: string,
   options?: {
-    query?: UseQueryOptions<
+    query?: Partial<UseQueryOptions<
       Awaited<ReturnType<typeof getClaims>>,
       TError,
       TData
-    >;
+    >>;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -727,11 +727,11 @@ export const getGetWalletQueryOptions = <
 >(
   deliveryId: string,
   options?: {
-    query?: UseQueryOptions<
+    query?: Partial<UseQueryOptions<
       Awaited<ReturnType<typeof getWallet>>,
       TError,
       TData
-    >;
+    >>;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
@@ -768,11 +768,11 @@ export function useGetWallet<
 >(
   deliveryId: string,
   options?: {
-    query?: UseQueryOptions<
+    query?: Partial<UseQueryOptions<
       Awaited<ReturnType<typeof getWallet>>,
       TError,
       TData
-    >;
+    >>;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {

@@ -1,5 +1,5 @@
 import { MobileLayout } from "@/components/layout/MobileLayout";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
 export default function NotFound() {

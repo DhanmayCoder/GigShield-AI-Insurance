@@ -12,8 +12,12 @@ const buttonVariants = cva(
       variant: {
         default:
            "bg-primary text-primary-foreground border border-primary-border",
+        primary:
+           "bg-primary text-primary-foreground border border-primary-border",
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm border-destructive-border",
+        danger:
+          "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100",
         outline:
           " border [border-color:var(--button-outline)] shadow-xs active:shadow-none ",
         secondary:
@@ -25,6 +29,7 @@ const buttonVariants = cva(
         default: "min-h-9 px-4 py-2",
         sm: "min-h-8 rounded-md px-3 text-xs",
         lg: "min-h-10 rounded-md px-8",
+        xl: "min-h-12 rounded-xl px-8 py-3 text-base",
         icon: "h-9 w-9",
       },
     },

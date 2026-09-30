@@ -1,19 +1,31 @@
 import { useAuth } from "@/lib/auth";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { useGetWallet } from "@workspace/api-client-react";
-import { Loader2, TrendingUp, PiggyBank, ArrowUpRight, ArrowDownLeft, Calendar } from "lucide-react";
+import { Loader2, TrendingUp, PiggyBank, ArrowUpRight, ArrowDownLeft, Calendar, AlertCircle } from "lucide-react";
 import { formatCurrency, cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 
 export default function Wallet() {
   const { deliveryId } = useAuth();
-  const { data: wallet, isLoading } = useGetWallet(deliveryId || "", {
+  const { data: wallet, isLoading, isError } = useGetWallet(deliveryId || "", {
     query: { enabled: !!deliveryId }
   });
 
-  if (isLoading || !wallet) {
+  if (isLoading) {
     return <MobileLayout><Loader2 className="mx-auto mt-20 animate-spin text-primary w-8 h-8" /></MobileLayout>;
+  }
+
+  if (isError || !wallet) {
+    return (
+      <MobileLayout>
+        <div className="flex flex-col items-center justify-center mt-20 px-6 text-center">
+          <AlertCircle className="w-10 h-10 text-red-400 mb-3" />
+          <p className="text-gray-700 font-semibold">Failed to load wallet</p>
+          <p className="text-sm text-gray-500 mt-1">Please check your connection and try again.</p>
+        </div>
+      </MobileLayout>
+    );
   }
 
   return (

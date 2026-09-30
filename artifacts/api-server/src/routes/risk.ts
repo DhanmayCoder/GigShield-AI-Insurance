@@ -85,7 +85,7 @@ router.post("/score", (req, res) => {
   const { score, breakdown } = calcRiskScore(plan, env as { rain: number; temp: number; pollution: number; traffic: number; strike: number });
   const { tier, description } = getPayoutTier(score);
 
-  res.json({
+  return res.json({
     score,
     plan,
     payoutTier: tier,

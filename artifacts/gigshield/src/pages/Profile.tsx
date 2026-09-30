@@ -1,18 +1,30 @@
 import { useAuth } from "@/lib/auth";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { useGetUser } from "@workspace/api-client-react";
-import { Button } from "@/components/ui/Button";
-import { Loader2, UserCircle, MapPin, CreditCard, Shield, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, UserCircle, MapPin, CreditCard, Shield, LogOut, AlertCircle, Clock } from "lucide-react";
 import { format } from "date-fns";
 
 export default function Profile() {
   const { deliveryId, logout } = useAuth();
-  const { data: user, isLoading } = useGetUser(deliveryId || "", {
+  const { data: user, isLoading, isError } = useGetUser(deliveryId || "", {
     query: { enabled: !!deliveryId }
   });
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return <MobileLayout><Loader2 className="mx-auto mt-20 animate-spin text-primary w-8 h-8" /></MobileLayout>;
+  }
+
+  if (isError || !user) {
+    return (
+      <MobileLayout>
+        <div className="flex flex-col items-center justify-center mt-20 px-6 text-center">
+          <AlertCircle className="w-10 h-10 text-red-400 mb-3" />
+          <p className="text-gray-700 font-semibold">Failed to load profile</p>
+          <p className="text-sm text-gray-500 mt-1">Please check your connection and try again.</p>
+        </div>
+      </MobileLayout>
+    );
   }
 
   return (
@@ -27,9 +39,15 @@ export default function Profile() {
           <h2 className="text-2xl font-bold text-gray-900">{user.name}</h2>
           <p className="text-gray-500 font-medium mt-1">ID: {user.deliveryId}</p>
           
-          <div className="flex items-center gap-2 mt-4 px-4 py-1.5 bg-green-50 text-green-700 rounded-full text-sm font-bold border border-green-100">
-            <Shield size={16} /> Active Coverage
-          </div>
+          {user.isEligibleForClaim ? (
+            <div className="flex items-center gap-2 mt-4 px-4 py-1.5 bg-green-50 text-green-700 rounded-full text-sm font-bold border border-green-100">
+              <Shield size={16} /> Active Coverage
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 mt-4 px-4 py-1.5 bg-amber-50 text-amber-700 rounded-full text-sm font-bold border border-amber-100">
+              <Clock size={16} /> Cooling Period
+            </div>
+          )}
         </div>
 
         <div className="bg-white rounded-3xl p-2 shadow-sm border border-gray-100 mb-8">

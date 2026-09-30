@@ -1,7 +1,8 @@
 import { useAuth } from "@/lib/auth";
 import { MobileLayout } from "@/components/layout/MobileLayout";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { useGetUser, useUpdateUserPlan } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Shield, Check, Loader2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -11,6 +12,7 @@ export default function Plans() {
   const { data: user, refetch } = useGetUser(deliveryId || "", {
     query: { enabled: !!deliveryId }
   });
+  const queryClient = useQueryClient();
   const { mutate: updatePlan, isPending } = useUpdateUserPlan();
 
   if (!user) return <MobileLayout><Loader2 className="mx-auto mt-20 animate-spin" /></MobileLayout>;
@@ -19,7 +21,12 @@ export default function Plans() {
     if (user.plan === planId) return;
     updatePlan(
       { deliveryId: user.deliveryId, data: { plan: planId } },
-      { onSuccess: () => refetch() }
+      { 
+        onSuccess: () => {
+          refetch();
+          queryClient.invalidateQueries({ queryKey: [`/api/users/${user.deliveryId}`] });
+        } 
+      }
     );
   };
 

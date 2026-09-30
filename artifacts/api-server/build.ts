@@ -1,7 +1,8 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import { build as esbuild } from "esbuild";
-import { rm, readFile } from "fs/promises";
+import { rm, readFile, cp } from "fs/promises";
+import { execSync } from "child_process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,6 +42,18 @@ async function buildAll() {
   const distDir = path.resolve(__dirname, "dist");
   await rm(distDir, { recursive: true, force: true });
 
+  // 1. Build the Vite frontend
+  console.log("building frontend...");
+  const frontendDir = path.resolve(__dirname, "..", "gigshield");
+  execSync("pnpm run build", { cwd: frontendDir, stdio: "inherit" });
+
+  // 2. Copy the Vite output into our dist/public folder
+  const frontendDist = path.resolve(frontendDir, "dist", "public");
+  const publicOut = path.resolve(distDir, "public");
+  await cp(frontendDist, publicOut, { recursive: true });
+  console.log("frontend copied to dist/public");
+
+  // 3. Bundle the Express server
   console.log("building server...");
   const pkgPath = path.resolve(__dirname, "package.json");
   const pkg = JSON.parse(await readFile(pkgPath, "utf-8"));
@@ -73,3 +86,4 @@ buildAll().catch((err) => {
   console.error(err);
   process.exit(1);
 });
+

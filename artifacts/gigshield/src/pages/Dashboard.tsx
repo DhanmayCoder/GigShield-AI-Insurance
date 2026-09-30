@@ -2,19 +2,21 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { RiskGauge } from "@/components/RiskGauge";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { 
   useGetUser, 
   useGetEnvironmentData, 
   useCalculateRiskScore,
   useSubmitClaim
 } from "@workspace/api-client-react";
-import { CloudRain, ThermometerSun, Wind, Car, AlertOctagon, ShieldAlert, Loader2, MapPin } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { CloudRain, ThermometerSun, Wind, Car, AlertOctagon, ShieldAlert, Loader2, MapPin, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatCurrency } from "@/lib/utils";
 
 export default function Dashboard() {
   const { deliveryId } = useAuth();
+  const queryClient = useQueryClient();
   
   // Data fetching
   const { data: user, isLoading: loadingUser } = useGetUser(deliveryId || "", {
@@ -61,8 +63,8 @@ export default function Dashboard() {
     setClaimModalOpen(true);
     setClaimStep("verifying");
     
-    // Simulate GPS verification delay
-    setTimeout(() => {
+    // Get real GPS location, then submit claim
+    const doSubmit = (lat?: number, lng?: number) => {
       if (!user || !scoreResult) return;
       
       submitClaim({
@@ -70,20 +72,36 @@ export default function Dashboard() {
           deliveryId: user.deliveryId,
           plan: user.plan as any,
           riskScore: scoreResult.score,
-          currentLatitude: 12.9716, // Mock location
-          currentLongitude: 77.5946
+          ...(lat != null && lng != null ? { currentLatitude: lat, currentLongitude: lng } : {})
         }
       }, {
         onSuccess: (res) => {
           setClaimResult(res);
           setClaimStep("result");
+          // Invalidate caches so wallet/claims/user reflect the new claim
+          if (user?.deliveryId) {
+            queryClient.invalidateQueries({ queryKey: [`/api/wallet/${user.deliveryId}`] });
+            queryClient.invalidateQueries({ queryKey: [`/api/claims/${user.deliveryId}`] });
+            queryClient.invalidateQueries({ queryKey: [`/api/users/${user.deliveryId}`] });
+          }
         },
-        onError: () => {
-          setClaimResult({ success: false, reason: "Failed to process claim network error." });
+        onError: (err: any) => {
+          setClaimResult(err?.data || { success: false, reason: err?.message || "Failed to process claim — network error." });
           setClaimStep("result");
         }
       });
-    }, 2000);
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => doSubmit(position.coords.latitude, position.coords.longitude),
+        () => doSubmit(), // Geolocation denied/unavailable — submit without coords
+        { timeout: 5000, enableHighAccuracy: false }
+      );
+    } else {
+      // Browser doesn't support Geolocation — submit without coords after a brief delay
+      setTimeout(() => doSubmit(), 1500);
+    }
   };
 
   if (loadingUser || !user) {
@@ -234,10 +252,7 @@ export default function Dashboard() {
                   <Button 
                     className="w-full" 
                     size="lg"
-                    onClick={() => {
-                      setClaimModalOpen(false);
-                      // In a real app, we'd invalidate queries here to refresh wallet/history
-                    }}
+                    onClick={() => setClaimModalOpen(false)}
                   >
                     Back to Dashboard
                   </Button>
@@ -252,10 +267,19 @@ export default function Dashboard() {
   );
 }
 
+const ENV_BAR_COLORS: Record<string, { bg: string; text: string }> = {
+  "bg-blue-500": { bg: "bg-blue-50", text: "text-blue-600" },
+  "bg-orange-500": { bg: "bg-orange-50", text: "text-orange-600" },
+  "bg-gray-500": { bg: "bg-gray-100", text: "text-gray-600" },
+  "bg-red-500": { bg: "bg-red-50", text: "text-red-600" },
+  "bg-purple-500": { bg: "bg-purple-50", text: "text-purple-600" },
+};
+
 function EnvBar({ icon: Icon, label, value, color }: { icon: any, label: string, value: number, color: string }) {
+  const colorMap = ENV_BAR_COLORS[color] ?? { bg: "bg-gray-50", text: "text-gray-600" };
   return (
     <div className="bg-white p-3.5 rounded-2xl border border-gray-100 flex items-center gap-4">
-      <div className={`p-2.5 rounded-xl ${color.replace('bg-', 'bg-').replace('500', '50')} ${color.replace('bg-', 'text-').replace('50', '600')}`}>
+      <div className={`p-2.5 rounded-xl ${colorMap.bg} ${colorMap.text}`}>
         <Icon size={20} />
       </div>
       <div className="flex-1">
@@ -276,23 +300,3 @@ function EnvBar({ icon: Icon, label, value, color }: { icon: any, label: string,
   );
 }
 
-// Need CheckCircle for the modal since it wasn't imported from lucide
-function CheckCircle(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinelinejoin="round"
-    >
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-      <polyline points="22 4 12 14.01 9 11.01" />
-    </svg>
-  )
-}

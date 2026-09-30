@@ -3,6 +3,7 @@ import { db, usersTable, claimsTable, walletTransactionsTable } from "@workspace
 import { eq } from "drizzle-orm";
 import { SubmitClaimBody } from "@workspace/api-zod";
 import { randomUUID } from "crypto";
+import { isEligibleForClaim } from "../lib/eligibility";
 
 const router: IRouter = Router();
 
@@ -11,11 +12,6 @@ const PAYOUT_AMOUNTS: Record<string, Record<string, number>> = {
   silver: { small: 400, medium: 800, full: 1500 },
   gold: { small: 500, medium: 1000, full: 2000 },
 };
-
-function isEligibleForClaim(registeredAt: Date): boolean {
-  const THREE_WEEKS_MS = 21 * 24 * 60 * 60 * 1000;
-  return Date.now() - registeredAt.getTime() >= THREE_WEEKS_MS;
-}
 
 function getPayoutTier(score: number): "none" | "small" | "medium" | "full" {
   if (score >= 80) return "full";

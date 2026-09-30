@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useCreateUser } from "@workspace/api-client-react";
 import { MobileLayout } from "@/components/layout/MobileLayout";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { ShieldCheck, UserCircle, CreditCard, MapPin, Truck } from "lucide-react";
 import { motion } from "framer-motion";
 

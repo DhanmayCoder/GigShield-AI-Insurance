@@ -7,12 +7,24 @@ import { format } from "date-fns";
 
 export default function Claims() {
   const { deliveryId } = useAuth();
-  const { data: history, isLoading } = useGetClaims(deliveryId || "", {
+  const { data: history, isLoading, isError } = useGetClaims(deliveryId || "", {
     query: { enabled: !!deliveryId }
   });
 
-  if (isLoading || !history) {
+  if (isLoading) {
     return <MobileLayout><Loader2 className="mx-auto mt-20 animate-spin text-primary w-8 h-8" /></MobileLayout>;
+  }
+
+  if (isError || !history) {
+    return (
+      <MobileLayout>
+        <div className="flex flex-col items-center justify-center mt-20 px-6 text-center">
+          <XCircle className="w-10 h-10 text-red-400 mb-3" />
+          <p className="text-gray-700 font-semibold">Failed to load claims</p>
+          <p className="text-sm text-gray-500 mt-1">Please check your connection and try again.</p>
+        </div>
+      </MobileLayout>
+    );
   }
 
   const getStatusIcon = (status: string) => {
