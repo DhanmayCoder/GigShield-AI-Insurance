@@ -23,7 +23,7 @@ if (process.env["NODE_ENV"] === "production") {
   app.use(express.static(publicDir, { maxAge: "1y", immutable: true }));
 
   // SPA catch-all: any non-API route returns index.html for client-side routing
-  app.get("*", (_req, res) => {
+  app.use((_req, res) => {
     res.sendFile(path.join(publicDir, "index.html"));
   });
 }
